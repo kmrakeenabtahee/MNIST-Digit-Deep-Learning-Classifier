@@ -1,7 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import Dense, Dropout, Flatten
-from tensorflow.keras.models import Sequential
+from tensorflow.keras import layers, models
 
 
 # Task 1 (2 marks)
@@ -16,15 +15,20 @@ def image_statistics(image, darkness):
      >>> image_statistics(image, 10)
      {'resolution': (2, 3), 'dark_pixels': (3, 3, 2)}
      """
+    # Finds the size and number of channels of the image in terms of rows, columns and channels
     num_rows, num_cols, num_channels = image.shape
+
+    # Creates a list of the number of dark pixels in each channel
     dark_pixels = []
 
+    # Iterates through each channel and adds the number of dark pixels compared to the threshold in the darkness value pre-defined
     for channel_index in range(num_channels):
         channel = image[:, :, channel_index]
         dark_pixels_count = np.sum(channel < darkness)
         dark_pixels.append(dark_pixels_count)
     dark_pixels_tuple = tuple(dark_pixels)
 
+    # Returns the resolution and the number of dark pixels
     stat = {"resolution": (num_rows, num_cols), "dark_pixels": dark_pixels_tuple}
     return stat
 
@@ -43,8 +47,11 @@ def bounding_box(image, top_left, bottom_right):
              [250, 255, 255]]])
      """
 
+    # Gets the top left and bottom right coordinates of the bounding box
     top_x, top_y = top_left
     bot_x, bot_y = bottom_right
+
+    # Slicing the image based on the top left and bottom right coordinates
     bounding_box_image = image[top_x : bot_x + 1, top_y : bot_y + 1]
     return bounding_box_image
 
@@ -97,19 +104,20 @@ def build_deep_nn(
     'sigmoid'
 
     """
-    model = Sequential()
+    # Create the model
+    model = models.Sequential()
 
-    # Flatten layer
-    model.add(Flatten(input_shape=(rows, columns, channels)))
+    # Flatten layer with the input shape
+    model.add(layers.Flatten(input_shape=(rows, columns, channels)))
 
-    # Hidden layers
+    # Hidden layers with specified sizes and activations
     for i in range(num_hidden):
-        model.add(Dense(hidden_sizes[i], activation="relu"))
+        model.add(layers.Dense(hidden_sizes[i], activation="relu"))
         if dropout_rates[i] > 0:
-            model.add(Dropout(dropout_rates[i]))
+            model.add(layers.Dropout(dropout_rates[i]))
 
-    # Final layer
-    model.add(Dense(output_size, activation=output_activation))
+    # Final layer with specified size and activation
+    model.add(layers.Dense(output_size, activation=output_activation))
 
     return model
 
